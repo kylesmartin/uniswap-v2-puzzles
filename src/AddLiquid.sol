@@ -2,6 +2,7 @@
 pragma solidity ^0.8.13;
 
 import "./interfaces/IUniswapV2Pair.sol";
+import "./interfaces/IERC20.sol";
 
 contract AddLiquid {
     /**
@@ -21,5 +22,22 @@ contract AddLiquid {
 
         // pair.getReserves();
         // pair.mint(...);
+
+        // token0 = USDC
+        // token1 = WETH
+
+        uint256 totalSupply = pair.totalSupply();
+
+        // Invariant to keep ratio:
+        //  - amount0.mul(_totalSupply) / _reserve0 = amount1.mul(_totalSupply) / _reserve1
+        //  - therefore: amount1 = (amount0.mul(_totalSupply) / reserve0).mul(reserve1) / _totalSupply
+        // Use 1000 USDC for amount0
+        uint256 usdcAmount = 1000e6;
+        uint256 wethAmount = (usdcAmount * totalSupply / usdcReserve) * wethReserve / totalSupply;
+
+        IERC20(usdc).transfer(address(pair), usdcAmount);
+        IERC20(weth).transfer(address(pair), wethAmount);
+
+        pair.mint(msg.sender);
     }
 }
