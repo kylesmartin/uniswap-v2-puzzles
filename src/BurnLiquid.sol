@@ -20,5 +20,8 @@ contract BurnLiquid {
          *     to: recipient address to receive tokenA and tokenB.
          */
         // your code here
+        bool success = IERC20(pool).transfer(pool, 1e16);
+        require(success, "transfer failed");
+        IUniswapV2Pair(pool).burn(address(this));
     }
 }
