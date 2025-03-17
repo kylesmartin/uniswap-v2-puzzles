@@ -2,6 +2,7 @@
 pragma solidity ^0.8.13;
 
 import "./interfaces/IUniswapV2Pair.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 contract AddLiquidWithRouter {
     /**
@@ -20,6 +21,8 @@ contract AddLiquidWithRouter {
 
     function addLiquidityWithRouter(address usdcAddress, uint256 deadline) public {
         // your code start here
+        IERC20(usdcAddress).approve(router, 1 ether);
+        IUniswapV2Router(router).addLiquidityETH{value: 1 ether}(usdcAddress, 1000e6, 50e6, 1 gwei, msg.sender, deadline);
     }
 
     receive() external payable {}
