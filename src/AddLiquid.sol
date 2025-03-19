@@ -36,7 +36,7 @@ contract AddLiquid {
         uint256 wethAmount = (usdcAmount * totalSupply / usdcReserve) * wethReserve / totalSupply;
 
         IERC20(usdc).transfer(address(pair), usdcAmount);
-        IERC20(weth).transfer(address(pair), wethAmount+1);
+        IERC20(weth).transfer(address(pair), wethAmount+1); // Must add 1 due to precision errors with dividing
 
         pair.mint(msg.sender);
     }
