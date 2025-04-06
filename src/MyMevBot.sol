@@ -30,12 +30,56 @@ contract MyMevBot {
 
     function performArbitrage() public {
         // your code here
+        flashLenderPool.flash(address(this), 1001e6, 0, "");
     }
 
     function uniswapV3FlashCallback(uint256 _fee0, uint256, bytes calldata data) external {
         callMeCallMe();
 
-        // your code start here
+        address[] memory path = new address[](2);
+        path[0] = address(usdc);
+        path[1] = address(weth);
+
+        // Swap USDC for WETH
+        usdc.approve(address(router), 1001e6);
+        router.swapExactTokensForTokens(
+            1001e6,
+            0,
+            path,
+            address(this),
+            block.timestamp + 1
+        );
+
+        // Swap WETH for USDT
+        path[0] = address(weth);
+        path[1] = address(usdt);
+        uint256 wethBal = weth.balanceOf(address(this));
+        weth.approve(address(router), wethBal);
+        router.swapExactTokensForTokens(
+            wethBal,
+            0,
+            path,
+            address(this),
+            block.timestamp + 1
+        );
+
+        // Swap USDT for USDC
+        path[0] = address(usdt);
+        path[1] = address(usdc);
+        uint256 usdtBal = usdt.balanceOf(address(this));
+        usdt.approve(address(router), usdtBal);
+        router.swapExactTokensForTokens(
+            usdtBal,
+            0,
+            path,
+            address(this),
+            block.timestamp + 1
+        );
+
+        // Repay the flash loan
+        uint256 usdcBal = usdc.balanceOf(address(this));
+        require(usdcBal >= 1001e6 + _fee0, "Not enough USDC to repay flash loan");
+        usdc.transfer(address(flashLenderPool), 1001e6 + _fee0);
     }
 
     function callMeCallMe() private {
