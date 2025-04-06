@@ -19,22 +19,22 @@ contract ExactSwapWithRouter {
 
     function performExactSwapWithRouter(address weth, address usdc, uint256 deadline) public {
         // your code start here
+        IERC20(weth).approve(router, 1 ether);
+ 
+        address[] memory path = new address[](2);
+        path[0] = weth;
+        path[1] = usdc;
+
+        IUniswapV2Router(router).swapTokensForExactTokens(1337e6, 1 ether, path, address(this), deadline);
     }
 }
 
 interface IUniswapV2Router {
-    /**
-     *     amountIn: the amount of input tokens to swap.
-     *     amountOutMin: the minimum amount of output tokens that must be received for the transaction not to revert.
-     *     path: an array of token addresses. In our case, WETH and USDC.
-     *     to: recipient address to receive the liquidity tokens.
-     *     deadline: timestamp after which the transaction will revert.
-     */
-    function swapExactTokensForTokens(
-        uint256 amountIn,
-        uint256 amountOutMin,
+    function swapTokensForExactTokens(
+        uint amountOut,
+        uint amountInMax,
         address[] calldata path,
         address to,
-        uint256 deadline
+        uint deadline
     ) external returns (uint256[] memory amounts);
 }

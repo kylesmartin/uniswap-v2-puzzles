@@ -23,6 +23,37 @@ contract ExactSwap {
          *     data: leave it empty.
          */
 
-        // your code start here
+        /*
+        amount0In = 0
+        Solve for amount1In (WETH inputted)
+
+        balance1 = reserve1 + amount1In
+        uint amount1In = balance1 > _reserve1 - amount1Out ? balance1 - (_reserve1 - amount1Out)
+
+
+        */
+        (uint256 reserve0, uint256 reserve1,) = IUniswapV2Pair(pool).getReserves();
+
+        uint256 amount0In = 0;
+        uint256 amount0Out = 1337e6;
+        uint256 balance0 = reserve0 - amount0Out;
+
+        uint256 balance0Adjusted = (balance0 * 1000) - (amount0In * 3);
+        uint256 reserveProduct = reserve0 * reserve1 * 1000**2;
+
+        uint256 balance1Adjusted = (reserveProduct / balance0Adjusted);
+        /*
+        balance1Adjusted = (balance1 * 1000) - (amount1In * 3)
+        balance1Adjusted = ((reserve1 + amount1In) * 1000) - (amount1In * 3)
+        balance1Adjusted = (reserve1 * 1000 + amount1In * 1000) - (amount1In * 3)
+        balance1Adjusted = 1000reserve1 + 1000amount1In - 3amount1In
+        balance1Adjusted = 1000reserve1 + 997amount1In
+
+        amount1In = (balance1Adjusted - 1000reserve1) / 997
+        */
+        uint256 amount1In = ((balance1Adjusted - 1000 * reserve1) / 997) + 1; // add 1 to avoid rounding errors
+
+        IERC20(weth).transfer(pool, amount1In);
+        IUniswapV2Pair(pool).swap(amount0Out, 0, address(this), new bytes(0));
     }
 }
